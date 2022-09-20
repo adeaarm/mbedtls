@@ -41,6 +41,9 @@
 #include "mbedtls/threading.h"
 #endif
 
+#if defined(MBEDTLS_PSA_CRYPTO_C)
+#include "psa/crypto.h"
+#endif
 
 /** Critical entropy source failure. */
 #define MBEDTLS_ERR_ENTROPY_SOURCE_FAILED                 -0x003C
@@ -122,11 +125,15 @@ typedef struct mbedtls_entropy_context
     int MBEDTLS_PRIVATE(accumulator_started); /* 0 after init.
                               * 1 after the first update.
                               * -1 after free. */
+#if defined(MBEDTLS_PSA_CRYPTO_C)
+    psa_hash_operation_t MBEDTLS_PRIVATE(operation);
+#else
 #if defined(MBEDTLS_ENTROPY_SHA512_ACCUMULATOR)
     mbedtls_sha512_context  MBEDTLS_PRIVATE(accumulator);
 #elif defined(MBEDTLS_ENTROPY_SHA256_ACCUMULATOR)
     mbedtls_sha256_context  MBEDTLS_PRIVATE(accumulator);
 #endif
+#endif /* MBEDTLS_PSA_CRYPTO_C */
     int             MBEDTLS_PRIVATE(source_count); /* Number of entries used in source. */
     mbedtls_entropy_source_state    MBEDTLS_PRIVATE(source)[MBEDTLS_ENTROPY_MAX_SOURCES];
 #if defined(MBEDTLS_THREADING_C)
